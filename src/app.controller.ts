@@ -6,15 +6,15 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  COURSE_ENDPOINT = process.env.COURSE_ENDPOINT;
+  COURSE_ENDPOINT = process.env.COURSE_SERVICE_ENDPOINT;
   ENROLLMENT_ENDPOINT = process.env.ENROLLMENT_ENDPOINT;
   NOTIFICATION_ENDPOINT = process.env.NOTIFICATION_ENDPOINT;
 
-  @Get('/api/course/*')
+  @Get('/api/courses/*')
   async getCourses(@Req() req, @Res() res) {
     try {
       console.log('redirecting to course service');
-      const urlPath = req.originalUrl.replace('/api/course', 'courses');
+      const urlPath = req.originalUrl.replace('/api/courses', 'courses');
       console.log(urlPath);
 
       const response = await axios.get(`${this.COURSE_ENDPOINT}/${urlPath}`, {
@@ -145,22 +145,29 @@ export class AppController {
     }
   }
 
-  @Post('api/course/*')
+  @Post('api/courses/*')
   async createCourse(@Req() req, @Res() res) {
     try {
       console.log('redirecting to course service');
-      const urlPath = req.originalUrl.replace('/api/course', 'courses');
+      const urlPath = req.originalUrl.replace('/api/courses', 'courses');
       console.log(urlPath);
 
-      const response = await axios.post(`${this.COURSE_ENDPOINT}/${urlPath}`, {
+      console.log(req.body);
+      const response = await axios({
+        method: 'post',
+        url: `${this.COURSE_ENDPOINT}/${urlPath}`,
+        data: req.body,
         headers: {
           Authorization: req.headers.authorization,
         },
       });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      console.log(error?.response?.data?.message);
+      return res.status(error?.response?.data?.statusCode).send({
+        ...error?.response?.data,
+      });
     }
   }
 
@@ -230,11 +237,11 @@ export class AppController {
     }
   }
 
-  @Patch('api/course/*')
+  @Patch('api/courses/*')
   async updateCourse(@Req() req, @Res() res) {
     try {
       console.log('redirecting to course service');
-      const urlPath = req.originalUrl.replace('/api/course', 'courses');
+      const urlPath = req.originalUrl.replace('/api/courses', 'courses');
       console.log(urlPath);
 
       const response = await axios.patch(`${this.COURSE_ENDPOINT}/${urlPath}`, {
@@ -315,11 +322,11 @@ export class AppController {
     }
   }
 
-  @Delete('api/course/*')
+  @Delete('api/courses/*')
   async deleteCourse(@Req() req, @Res() res) {
     try {
       console.log('redirecting to course service');
-      const urlPath = req.originalUrl.replace('/api/course', 'courses');
+      const urlPath = req.originalUrl.replace('/api/courses', 'courses');
       console.log(urlPath);
 
       const response = await axios.delete(
