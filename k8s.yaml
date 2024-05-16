@@ -15,10 +15,10 @@ spec:
         app: local-gateway
     spec:
       containers:
-      - name: app
-        image: local/gateway:v1
-        ports:
-        - containerPort: 3002
+        - name: app
+          image: local/gateway:v1
+          ports:
+            - containerPort: 3002
 ---
 apiVersion: v1
 kind: Service
@@ -29,8 +29,8 @@ spec:
   selector:
     app: local-gateway
   ports:
-  - name: local-gateway-port
-    protocol: TCP
-    port: 3002
-    targetPort: 3002
-    nodePort: 31001
+    - name: local-gateway-port
+      protocol: TCP
+      port: 3002
+      targetPort: 3002
+      nodePort: 31001

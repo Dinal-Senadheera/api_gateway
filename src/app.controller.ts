@@ -8,6 +8,7 @@ export class AppController {
 
   COURSE_ENDPOINT = process.env.COURSE_SERVICE_ENDPOINT;
   ENROLLMENT_ENDPOINT = process.env.ENROLLMENT_ENDPOINT;
+  PAYMENT_ENDPOINT = process.env.PAYMENT_ENDPOINT;
   NOTIFICATION_ENDPOINT = process.env.NOTIFICATION_ENDPOINT;
 
   @Get('/api/courses/*')
@@ -24,8 +25,11 @@ export class AppController {
       });
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -46,8 +50,11 @@ export class AppController {
       });
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -61,25 +68,6 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.get(`${this.COURSE_ENDPOINT}/${urlPath}`, {
-        headers: {
-          Authorization: req.headers.authorization,
-        },
-      });
-      return res.status(response.status).send(response.data);
-    } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
-    }
-  }
-
-  @Get('/api/payment/*')
-  async getPayments(@Req() req, @Res() res) {
-    try {
-      console.log('redirecting to payment service');
-      const urlPath = req.originalUrl.replace('/api/payment', 'payments');
-      console.log(urlPath);
-
       const response = await axios.get(
         `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
         {
@@ -90,8 +78,33 @@ export class AppController {
       );
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Enrollment Service Down',
+        }),
+      });
+    }
+  }
+
+  @Get('/api/payment/*')
+  async getPayments(@Req() req, @Res() res) {
+    try {
+      console.log('redirecting to payment service');
+      const urlPath = req.originalUrl.replace('/api/payment', 'payments');
+      console.log(urlPath);
+
+      const response = await axios.get(`${this.PAYMENT_ENDPOINT}/${urlPath}`, {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      });
+      return res.status(response.status).send(response.data);
+    } catch (error) {
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Payment Service Down',
+        }),
+      });
     }
   }
 
@@ -105,18 +118,22 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.post(
-        `${this.NOTIFICATION_ENDPOINT}/${urlPath}`,
-        {
-          headers: {
-            Authorization: req.headers.authorization,
-          },
+      const response = await axios({
+        method: 'post',
+        url: `${this.NOTIFICATION_ENDPOINT}/${urlPath}`,
+        data: req.body,
+        headers: {
+          Authorization: req.headers.authorization,
         },
-      );
+      });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Notificatioin Service Down',
+        }),
+      });
     }
   }
 
@@ -130,18 +147,22 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.post(
-        `${this.NOTIFICATION_ENDPOINT}/${urlPath}`,
-        {
-          headers: {
-            Authorization: req.headers.authorization,
-          },
+      const response = await axios({
+        method: 'post',
+        url: `${this.NOTIFICATION_ENDPOINT}/${urlPath}`,
+        data: req.body,
+        headers: {
+          Authorization: req.headers.authorization,
         },
-      );
+      });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Notification Service Down',
+        }),
+      });
     }
   }
 
@@ -152,7 +173,6 @@ export class AppController {
       const urlPath = req.originalUrl.replace('/api/courses', 'courses');
       console.log(urlPath);
 
-      console.log(req.body);
       const response = await axios({
         method: 'post',
         url: `${this.COURSE_ENDPOINT}/${urlPath}`,
@@ -164,9 +184,10 @@ export class AppController {
 
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error?.response?.data?.message);
-      return res.status(error?.response?.data?.statusCode).send({
-        ...error?.response?.data,
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
       });
     }
   }
@@ -181,15 +202,22 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.post(`${this.COURSE_ENDPOINT}/${urlPath}`, {
+      const response = await axios({
+        method: 'post',
+        url: `${this.COURSE_ENDPOINT}/${urlPath}`,
+        data: req.body,
         headers: {
           Authorization: req.headers.authorization,
         },
       });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -203,15 +231,22 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.post(`${this.COURSE_ENDPOINT}/${urlPath}`, {
+      const response = await axios({
+        method: 'post',
+        url: `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
+        data: req.body,
         headers: {
           Authorization: req.headers.authorization,
         },
       });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Enrollment Service Down',
+        }),
+      });
     }
   }
 
@@ -222,18 +257,21 @@ export class AppController {
       const urlPath = req.originalUrl.replace('/api/payment', 'payments');
       console.log(urlPath);
 
-      const response = await axios.post(
-        `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
-        {
-          headers: {
-            Authorization: req.headers.authorization,
-          },
+      const response = await axios({
+        method: 'post',
+        url: `${this.PAYMENT_ENDPOINT}/${urlPath}`,
+        data: req.body,
+        headers: {
+          Authorization: req.headers.authorization,
         },
-      );
+      });
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Payment Service Down',
+        }),
+      });
     }
   }
 
@@ -244,15 +282,22 @@ export class AppController {
       const urlPath = req.originalUrl.replace('/api/courses', 'courses');
       console.log(urlPath);
 
-      const response = await axios.patch(`${this.COURSE_ENDPOINT}/${urlPath}`, {
+      const response = await axios({
+        method: 'patch',
+        url: `${this.COURSE_ENDPOINT}/${urlPath}`,
+        data: req.body,
         headers: {
           Authorization: req.headers.authorization,
         },
       });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -266,15 +311,22 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.patch(`${this.COURSE_ENDPOINT}/${urlPath}`, {
+      const response = await axios({
+        method: 'patch',
+        url: `${this.COURSE_ENDPOINT}/${urlPath}`,
+        data: req.body,
         headers: {
           Authorization: req.headers.authorization,
         },
       });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -288,15 +340,22 @@ export class AppController {
       );
       console.log(urlPath);
 
-      const response = await axios.patch(`${this.COURSE_ENDPOINT}/${urlPath}`, {
+      const response = await axios({
+        method: 'patch',
+        url: `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
+        data: req.body,
         headers: {
           Authorization: req.headers.authorization,
         },
       });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Enrollment Service Down',
+        }),
+      });
     }
   }
 
@@ -307,18 +366,22 @@ export class AppController {
       const urlPath = req.originalUrl.replace('/api/payment', 'payments');
       console.log(urlPath);
 
-      const response = await axios.patch(
-        `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
-        {
-          headers: {
-            Authorization: req.headers.authorization,
-          },
+      const response = await axios({
+        method: 'patch',
+        url: `${this.PAYMENT_ENDPOINT}/${urlPath}`,
+        data: req.body,
+        headers: {
+          Authorization: req.headers.authorization,
         },
-      );
+      });
+
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Payment Service Down',
+        }),
+      });
     }
   }
 
@@ -339,8 +402,11 @@ export class AppController {
       );
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -364,8 +430,11 @@ export class AppController {
       );
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Course Service Down',
+        }),
+      });
     }
   }
 
@@ -380,7 +449,7 @@ export class AppController {
       console.log(urlPath);
 
       const response = await axios.delete(
-        `${this.COURSE_ENDPOINT}/${urlPath}`,
+        `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
         {
           headers: {
             Authorization: req.headers.authorization,
@@ -389,8 +458,11 @@ export class AppController {
       );
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Enrollment Service Down',
+        }),
+      });
     }
   }
 
@@ -402,7 +474,7 @@ export class AppController {
       console.log(urlPath);
 
       const response = await axios.delete(
-        `${this.ENROLLMENT_ENDPOINT}/${urlPath}`,
+        `${this.PAYMENT_ENDPOINT}/${urlPath}`,
         {
           headers: {
             Authorization: req.headers.authorization,
@@ -411,8 +483,11 @@ export class AppController {
       );
       return res.status(response.status).send(response.data);
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Internal Server Error');
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Payment Service Down',
+        }),
+      });
     }
   }
 }

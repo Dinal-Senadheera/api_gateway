@@ -4,24 +4,30 @@ import { NextFunction, Request, Response } from 'express';
 
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
-  AUTH_ENDPOINT = process.env.AUTH_ENDPOINT;
+  AUTH_ENDPOINT = process.env.AUTH_SERVICE_ENDPOINT;
 
   async use(req: Request, res: Response, next: NextFunction) {
-    console.log('redirecting to authenticaiton service');
-    const jwtResponse = await axios.post(
-      `${this.AUTH_ENDPOINT}/api/auth/login`,
-      {
-        token: req.headers.authorization,
-      },
-    );
+    try {
+      console.log('redirecting to authenticaiton service');
 
-    const jwt = jwtResponse.data;
+      const jwtResponse = await axios({
+        method: 'post',
+        url: `${this.AUTH_ENDPOINT}/api/auth/login`,
+        data: req.body,
+        headers: req.headers,
+      });
 
-    if (!jwt) {
-      return res.status(401).send('Unauthorized');
+      const jwt = jwtResponse.data;
+
+      req.headers.authorization = jwt?.token;
+      next();
+    } catch (error) {
+      console.log('error', error?.response);
+      return res.status(error?.response?.data?.statusCode || 500).send(
+        {
+          ...error?.response?.data,
+        } || 'Internal Server Error - Authentication Service Down',
+      );
     }
-
-    req.headers.authorization = jwt;
-    next();
   }
 }
