@@ -12,7 +12,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
       const jwtResponse = await axios({
         method: 'post',
-        url: `${this.AUTH_ENDPOINT}/api/auth/login`,
+        url: `${this.AUTH_ENDPOINT}`,
         data: req.body,
         headers: req.headers,
       });
@@ -22,11 +22,11 @@ export class AuthenticationMiddleware implements NestMiddleware {
       req.headers.authorization = jwt?.token;
       next();
     } catch (error) {
-      console.log('error', error?.response);
+      console.log('error', error);
       return res.status(error?.response?.data?.statusCode || 500).send(
         {
-          ...error?.response?.data,
-        } || 'Internal Server Error - Authentication Service Down',
+          ...error?.response?.data
+        || {message: 'Internal Server Error - Authentication Service Down'}},
       );
     }
   }

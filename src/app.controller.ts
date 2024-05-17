@@ -7,8 +7,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   COURSE_ENDPOINT = process.env.COURSE_SERVICE_ENDPOINT;
-  ENROLLMENT_ENDPOINT = process.env.ENROLLMENT_ENDPOINT;
-  PAYMENT_ENDPOINT = process.env.PAYMENT_ENDPOINT;
+  ENROLLMENT_ENDPOINT = process.env.ENROLLMENT_SERVICE_ENDPOINT;
+  PAYMENT_ENDPOINT = process.env.PAYMENT_SERVICE_ENDPOINT;
   NOTIFICATION_ENDPOINT = process.env.NOTIFICATION_ENDPOINT;
 
   @Get('/api/courses/*')
@@ -78,6 +78,7 @@ export class AppController {
       );
       return res.status(response.status).send(response.data);
     } catch (error) {
+      console.log(error);
       return res.status(error?.response?.data?.statusCode || 500).send({
         ...(error?.response?.data || {
           message: 'Internal Server Error - Enrollment Service Down',
@@ -86,11 +87,11 @@ export class AppController {
     }
   }
 
-  @Get('/api/payment/*')
+  @Get('/api/payments/*')
   async getPayments(@Req() req, @Res() res) {
     try {
       console.log('redirecting to payment service');
-      const urlPath = req.originalUrl.replace('/api/payment', 'payments');
+      const urlPath = req.originalUrl.replace('/api/payments', 'payments');
       console.log(urlPath);
 
       const response = await axios.get(`${this.PAYMENT_ENDPOINT}/${urlPath}`, {
@@ -250,11 +251,11 @@ export class AppController {
     }
   }
 
-  @Post('api/payment/*')
+  @Post('api/payments/*')
   async createPayment(@Req() req, @Res() res) {
     try {
       console.log('redirecting to payment service');
-      const urlPath = req.originalUrl.replace('/api/payment', 'payments');
+      const urlPath = req.originalUrl.replace('/api/payments', 'payments');
       console.log(urlPath);
 
       const response = await axios({
@@ -359,11 +360,11 @@ export class AppController {
     }
   }
 
-  @Patch('api/payment/*')
+  @Patch('api/payments/*')
   async updatePayment(@Req() req, @Res() res) {
     try {
       console.log('redirecting to payment service');
-      const urlPath = req.originalUrl.replace('/api/payment', 'payments');
+      const urlPath = req.originalUrl.replace('/api/payments', 'payments');
       console.log(urlPath);
 
       const response = await axios({
@@ -466,11 +467,11 @@ export class AppController {
     }
   }
 
-  @Delete('api/payment/*')
+  @Delete('api/payments/*')
   async deletePayment(@Req() req, @Res() res) {
     try {
       console.log('redirecting to payment service');
-      const urlPath = req.originalUrl.replace('/api/payment', 'payments');
+      const urlPath = req.originalUrl.replace('/api/payments', 'payments');
       console.log(urlPath);
 
       const response = await axios.delete(
