@@ -21,10 +21,10 @@ spec:
           ports:
             - containerPort: 3002
           env:
-            - name: AUTH_SERVICE_URL
-              value: "http://auth-service.ctse-microservices.svc.cluster.local"
-            - name: COURSE_MANAGEMENT_URL
-              value: "http://course-management-svc.ctse-microservices.svc.cluster.local"
+            - name: COURSE_SERVICE_ENDPOINT
+              value: "http://course-management-svc"
+            - name: AUTH_SERVICE_ENDPOINT
+              value: "http://auth-service"
 ---
 apiVersion: v1
 kind: Service
