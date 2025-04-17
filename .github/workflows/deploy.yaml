@@ -62,6 +62,7 @@ jobs:
 
       - name: Verify Deployment
         run: |
+          kubectl rollout restart deployment/gateway-deploy -n ctse-microservices
           kubectl rollout status deployment/gateway-deploy -n ctse-microservices
           kubectl get pods -n ctse-microservices
           kubectl get svc -n ctse-microservices

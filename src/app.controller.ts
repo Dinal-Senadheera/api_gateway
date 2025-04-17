@@ -19,7 +19,7 @@ export class AppController {
       const urlPath = req.originalUrl.replace('/api/auth', '/api/auth');
       console.log(urlPath);
 
-      const response = await axios.get(`${this.AUTH_ENDPOINT}/${urlPath}`, {
+      const response = await axios.get(`${this.AUTH_ENDPOINT}${urlPath}`, {
         headers: {
           Authorization: req.headers.authorization,
         },
