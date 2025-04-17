@@ -1,11 +1,9 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { NextFunction, Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
-  constructor(private readonly jwtService: JwtService) {}
-
   async use(req: Request, res: Response, next: NextFunction) {
     // Public routes that don't require authentication
     const publicRoutes = ['/api/auth/google', '/api/auth/google/callback'];
@@ -26,13 +24,14 @@ export class AuthenticationMiddleware implements NestMiddleware {
     const token = authHeader.split(' ')[1];
 
     try {
-      // Verify token
-      const payload = this.jwtService.verify(token);
+      // Verify token manually using jsonwebtoken package
+      const secret = process.env.JWT_SECRET;
+      const payload = jwt.verify(token, secret);
+
       // Add user info to request for downstream services
       req['user'] = payload;
       next();
     } catch (error) {
-      // Invalid token = not logged in
       return res.status(401).json({
         success: false,
         message: 'Invalid or expired authentication',

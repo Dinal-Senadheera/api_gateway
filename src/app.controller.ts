@@ -11,7 +11,6 @@ export class AppController {
   PAYMENT_ENDPOINT = process.env.PAYMENT_SERVICE_ENDPOINT;
   NOTIFICATION_ENDPOINT = process.env.NOTIFICATION_ENDPOINT;
   AUTH_ENDPOINT = process.env.AUTH_SERVICE_ENDPOINT;
-  
 
   @Get('/api/auth/*')
   async getAuth(@Req() req, @Res() res) {
