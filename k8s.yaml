@@ -31,6 +31,9 @@ kind: Service
 metadata:
   name: api-gateway-svc
   namespace: ctse-microservices
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-0eaeb6f6b5a66f652"
 spec:
   type: LoadBalancer
   selector:
