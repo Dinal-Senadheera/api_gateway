@@ -2,35 +2,40 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-deploy
+  namespace: ctse-microservices
   labels:
-    app: local-gateway
+    app: api-gateway
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: local-gateway
+      app: api-gateway
   template:
     metadata:
       labels:
-        app: local-gateway
+        app: api-gateway
     spec:
       containers:
         - name: app
-          image: local/gateway:v1
+          image: dinalsenadheera/ctse-assignment-gateway:latest
           ports:
             - containerPort: 3002
+          env:
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service.ctse-microservices.svc.cluster.local"
+            - name: COURSE_MANAGEMENT_URL
+              value: "http://course-management-svc.ctse-microservices.svc.cluster.local"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: local-gateway-svc
+  name: api-gateway-svc
+  namespace: ctse-microservices
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
-    app: local-gateway
+    app: api-gateway
   ports:
-    - name: local-gateway-port
-      protocol: TCP
-      port: 3002
+    - protocol: TCP
+      port: 80
       targetPort: 3002
-      nodePort: 31001
