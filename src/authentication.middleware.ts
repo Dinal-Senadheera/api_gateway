@@ -1,34 +1,42 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import axios from 'axios';
+import { JwtService } from '@nestjs/jwt';
 import { NextFunction, Request, Response } from 'express';
 
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
-  AUTH_ENDPOINT = process.env.AUTH_SERVICE_ENDPOINT;
+  constructor(private readonly jwtService: JwtService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    try {
-      console.log('redirecting to authenticaiton service');
+    // Public routes that don't require authentication
+    const publicRoutes = ['/api/auth/google', '/api/auth/google/callback'];
+    if (publicRoutes.some((route) => req.path.startsWith(route))) {
+      return next();
+    }
 
-      const jwtResponse = await axios({
-        method: 'post',
-        url: `${this.AUTH_ENDPOINT}`,
-        data: req.body,
-        headers: req.headers,
+    // Check for token in Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      // No token = not logged in
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
       });
+    }
 
-      const jwt = jwtResponse.data;
+    const token = authHeader.split(' ')[1];
 
-      req.headers.authorization = jwt?.token;
-      console.log('jwt', jwt);
+    try {
+      // Verify token
+      const payload = this.jwtService.verify(token);
+      // Add user info to request for downstream services
+      req['user'] = payload;
       next();
     } catch (error) {
-      console.log('error', error);
-      return res.status(error?.response?.data?.statusCode || 500).send(
-        {
-          ...error?.response?.data
-        || {message: 'Internal Server Error - Authentication Service Down'}},
-      );
+      // Invalid token = not logged in
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired authentication',
+      });
     }
   }
 }

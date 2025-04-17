@@ -10,6 +10,32 @@ export class AppController {
   ENROLLMENT_ENDPOINT = process.env.ENROLLMENT_SERVICE_ENDPOINT;
   PAYMENT_ENDPOINT = process.env.PAYMENT_SERVICE_ENDPOINT;
   NOTIFICATION_ENDPOINT = process.env.NOTIFICATION_ENDPOINT;
+  AUTH_ENDPOINT = process.env.AUTH_SERVICE_ENDPOINT;
+  
+
+  @Get('/api/auth/*')
+  async getAuth(@Req() req, @Res() res) {
+    try {
+      console.log('redirecting to auth service');
+      const urlPath = req.originalUrl.replace('/api/auth', '/api/auth');
+      console.log(urlPath);
+
+      const response = await axios.get(`${this.AUTH_ENDPOINT}/${urlPath}`, {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      });
+      return res.status(response.status).send(response.data);
+    } catch (error) {
+      console.log(error);
+      console.log(error?.response?.data);
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Auth Service Down',
+        }),
+      });
+    }
+  }
 
   @Get('/api/courses/*')
   async getCourses(@Req() req, @Res() res) {
