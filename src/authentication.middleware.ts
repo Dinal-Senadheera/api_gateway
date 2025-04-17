@@ -7,6 +7,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     // Public routes that don't require authentication
     const publicRoutes = ['/api/auth/google', '/api/auth/google/callback'];
+    console.log('Request URL:', req.originalUrl);
     if (publicRoutes.some((route) => req.originalUrl.includes(route))) {
       return next();
     }
