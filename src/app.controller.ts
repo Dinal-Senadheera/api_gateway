@@ -15,13 +15,12 @@ export class AppController {
   @Get('/api/auth/*')
   async getAuth(@Req() req, @Res() res) {
     try {
-      console.log('redirecting to auth service');
+      console.log('redirecting to auth service', req.originalUrl);
       const urlPath = req.originalUrl.replace('/api/auth', '/api/auth');
       console.log(urlPath);
 
       const response = await axios.get(`${this.AUTH_ENDPOINT}${urlPath}`, {
         headers: {
-          code: req.query.code,
           Authorization: req.headers.authorization,
         },
       });
