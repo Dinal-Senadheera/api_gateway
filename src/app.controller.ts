@@ -21,6 +21,7 @@ export class AppController {
 
       const response = await axios.get(`${this.AUTH_ENDPOINT}${urlPath}`, {
         headers: {
+          code: req.query.code,
           Authorization: req.headers.authorization,
         },
       });
