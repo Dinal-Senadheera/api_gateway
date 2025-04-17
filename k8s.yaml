@@ -24,7 +24,7 @@ spec:
             - name: COURSE_SERVICE_ENDPOINT
               value: "http://course-management-svc"
             - name: AUTH_SERVICE_ENDPOINT
-              value: "http://auth-service"
+              value: "http://auth-service/api/auth/login"
 ---
 apiVersion: v1
 kind: Service
