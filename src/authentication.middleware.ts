@@ -18,7 +18,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
       // No token = not logged in
       return res.status(401).json({
         success: false,
-        message: 'Authentication required',
+        message: `Authentication required ${req.originalUrl}`,
       });
     }
 
