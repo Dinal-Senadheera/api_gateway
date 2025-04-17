@@ -31,6 +31,7 @@ kind: Service
 metadata:
   name: api-gateway-svc
   namespace: ctse-microservices
+  service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
   type: LoadBalancer
   selector:
