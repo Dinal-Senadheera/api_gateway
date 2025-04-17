@@ -20,6 +20,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
       const jwt = jwtResponse.data;
 
       req.headers.authorization = jwt?.token;
+      console.log('jwt', jwt);
       next();
     } catch (error) {
       console.log('error', error);
