@@ -21,6 +21,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
     let token: string | undefined = undefined;
 
+    console.log('Headers of checked req', req.headers);
     // First check Authorization header
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
