@@ -43,6 +43,8 @@ export class AppController {
         },
       });
 
+      console.log('Response Recieved', response.headers, response.data);
+
       if (response.headers && response.headers['set-cookie']) {
         res.setHeader('Set-Cookie', response.headers['set-cookie']);
       }
