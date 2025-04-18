@@ -42,6 +42,11 @@ export class AppController {
           Authorization: req.headers.authorization,
         },
       });
+
+      if (response.headers && response.headers['set-cookie']) {
+        res.setHeader('Set-Cookie', response.headers['set-cookie']);
+      }
+
       return res.status(response.status).send(response.data);
     } catch (error) {
       console.log(error);
