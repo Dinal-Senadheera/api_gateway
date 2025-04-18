@@ -42,12 +42,13 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
     try {
       // Verify token manually using jsonwebtoken package
-      const payload = jwt.verify(token);
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
 
       // Add user info to request for downstream services
       req['user'] = payload;
       next();
     } catch (error) {
+      console.log('Error verifying token:', error);
       return res.status(401).json({
         success: false,
         message: 'Invalid or expired authentication',
