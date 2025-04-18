@@ -6,8 +6,15 @@ import * as jwt from 'jsonwebtoken';
 export class AuthenticationMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     // Public routes that don't require authentication
-    const publicRoutes = ['/api/auth/google', '/api/auth/google/callback'];
+    const publicRoutes = [
+      '/api/auth/google',
+      '/api/auth/google/callback',
+      '/api/auth/success',
+    ];
+
     console.log('Request URL:', req.originalUrl);
+    console.log('Cookies received in middleware:', req.cookies);
+
     if (publicRoutes.some((route) => req.originalUrl.includes(route))) {
       return next();
     }
@@ -21,6 +28,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
     }
     // If no Authorization header, check for cookie
     else if (req.cookies && req.cookies.auth_token) {
+      console.log('Found token in cookies');
       token = req.cookies.auth_token;
     }
 
