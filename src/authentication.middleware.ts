@@ -41,8 +41,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
 
     try {
       // Verify token manually using jsonwebtoken package
-      const secret = process.env.JWT_SECRET;
-      const payload = jwt.verify(token, secret);
+      const payload = jwt.verify(token);
 
       // Add user info to request for downstream services
       req['user'] = payload;
