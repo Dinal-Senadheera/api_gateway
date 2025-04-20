@@ -1,34 +1,58 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import axios from 'axios';
 import { NextFunction, Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
-  AUTH_ENDPOINT = process.env.AUTH_SERVICE_ENDPOINT;
-
   async use(req: Request, res: Response, next: NextFunction) {
-    try {
-      console.log('redirecting to authenticaiton service');
+    // Public routes that don't require authentication
+    const publicRoutes = [
+      '/api/auth/google',
+      '/api/auth/google/callback',
+      '/api/auth/success',
+    ];
 
-      const jwtResponse = await axios({
-        method: 'post',
-        url: `${this.AUTH_ENDPOINT}`,
-        data: req.body,
-        headers: req.headers,
+    console.log('Request URL:', req.originalUrl);
+    console.log('Cookies received in middleware:', req.cookies);
+
+    if (publicRoutes.some((route) => req.originalUrl.includes(route))) {
+      return next();
+    }
+
+    let token: string | undefined = undefined;
+
+    console.log('Headers of checked req', req.headers);
+    // First check Authorization header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
+    // If no Authorization header, check for cookie
+    else if (req.cookies && req.cookies.auth_token) {
+      console.log('Found token in cookies');
+      token = req.cookies.auth_token;
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: `Authentication required`,
       });
+    }
 
-      const jwt = jwtResponse.data;
+    try {
+      // Verify token manually using jsonwebtoken package
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.headers.authorization = jwt?.token;
-      console.log('jwt', jwt);
+      // Add user info to request for downstream services
+      req['user'] = payload;
       next();
     } catch (error) {
-      console.log('error', error);
-      return res.status(error?.response?.data?.statusCode || 500).send(
-        {
-          ...error?.response?.data
-        || {message: 'Internal Server Error - Authentication Service Down'}},
-      );
+      console.log('Error verifying token:', error);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired authentication',
+      });
     }
   }
 }

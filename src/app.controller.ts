@@ -10,6 +10,56 @@ export class AppController {
   ENROLLMENT_ENDPOINT = process.env.ENROLLMENT_SERVICE_ENDPOINT;
   PAYMENT_ENDPOINT = process.env.PAYMENT_SERVICE_ENDPOINT;
   NOTIFICATION_ENDPOINT = process.env.NOTIFICATION_ENDPOINT;
+  AUTH_ENDPOINT = process.env.AUTH_SERVICE_ENDPOINT;
+
+  @Get('/api/auth/*')
+  async getAuth(@Req() req, @Res() res) {
+    try {
+      console.log('redirecting to auth service', req.originalUrl);
+      const urlPath = req.originalUrl;
+
+      // Special handling for the initial auth endpoint
+      if (req.originalUrl === '/api/auth/google') {
+        // For the initial OAuth redirect, make request with axios but handle redirect manually
+        const response = await axios.get(`${this.AUTH_ENDPOINT}${urlPath}`, {
+          headers: {
+            Authorization: req.headers.authorization,
+          },
+          // Tell axios not to follow redirects
+          maxRedirects: 0,
+          validateStatus: (status) => status >= 200 && status < 400,
+        });
+
+        // If we got a redirect response, extract the Location header and redirect the client
+        if (response.status === 302 && response.headers.location) {
+          return res.redirect(302, response.headers.location);
+        }
+      }
+
+      // Normal handling for all other endpoints
+      const response = await axios.get(`${this.AUTH_ENDPOINT}${urlPath}`, {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      });
+
+      console.log('Response Recieved', response.headers, response.data);
+
+      if (response.headers && response.headers['set-cookie']) {
+        res.setHeader('Set-Cookie', response.headers['set-cookie']);
+      }
+
+      return res.status(response.status).send(response.data);
+    } catch (error) {
+      console.log(error);
+      console.log(error?.response?.data);
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - Auth Service Down',
+        }),
+      });
+    }
+  }
 
   @Get('/api/courses/*')
   async getCourses(@Req() req, @Res() res) {
