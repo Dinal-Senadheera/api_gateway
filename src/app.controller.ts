@@ -61,6 +61,31 @@ export class AppController {
     }
   }
 
+  @Get('/api/user/*')
+  async getUser(@Req() req, @Res() res) {
+    try {
+      console.log('redirecting to user/auth service');
+      const urlPath = req.originalUrl;
+
+      const response = await axios.get(`${this.AUTH_ENDPOINT}${urlPath}`, {
+        headers: {
+          Authorization: req.headers.authorization,
+        },
+      });
+
+      console.log('Response Recieved', response.headers, response.data);
+
+      return res.status(response.status).send(response.data);
+    } catch (error) {
+      console.log(error);
+      return res.status(error?.response?.data?.statusCode || 500).send({
+        ...(error?.response?.data || {
+          message: 'Internal Server Error - User/Auth Service Down',
+        }),
+      });
+    }
+  }
+
   @Get('/api/courses/*')
   async getCourses(@Req() req, @Res() res) {
     try {
