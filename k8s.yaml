@@ -2,35 +2,45 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-deploy
+  namespace: ctse-microservices
   labels:
-    app: local-gateway
+    app: api-gateway
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: local-gateway
+      app: api-gateway
   template:
     metadata:
       labels:
-        app: local-gateway
+        app: api-gateway
     spec:
       containers:
         - name: app
-          image: local/gateway:v1
+          image: dinalsenadheera/ctse-assignment-gateway:latest
           ports:
             - containerPort: 3002
+          env:
+            - name: COURSE_SERVICE_ENDPOINT
+              value: 'http://course-management-svc'
+            - name: AUTH_SERVICE_ENDPOINT
+              value: 'http://auth-service'
+            - name: JWT_SECRET
+              value: 'your_jwt_secret_key'
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: local-gateway-svc
+  name: api-gateway-svc
+  namespace: ctse-microservices
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: 'internet-facing'
+    service.beta.kubernetes.io/aws-load-balancer-subnets: 'subnet-0eaeb6f6b5a66f652'
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
-    app: local-gateway
+    app: api-gateway
   ports:
-    - name: local-gateway-port
-      protocol: TCP
-      port: 3002
+    - protocol: TCP
+      port: 80
       targetPort: 3002
-      nodePort: 31001
